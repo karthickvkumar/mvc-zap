@@ -1,0 +1,22 @@
+services:
+  aspnet-app:
+    build: ./Docker/Aspnet/  # Replace with your actual ASP.NET MVC Docker image name
+    container_name: aspnet-app
+    ports:
+      - "5000:80"               # Map port 5000 on the host to port 80 in the container
+    networks:
+      - zap-network
+
+  zap:
+    build: ./Docker/Zap/
+    container_name: zap
+    ports:
+      - "8082:8080"             # Expose ZAP's web interface on port 8081
+    command: ZAP.bat -cmd -port 8082 -host 0.0.0.0 -config api.disablekey=true -config network.connection.timeoutInSecs=300 -quickurl http://aspnet-app:80 -quickprogress -quickout  C:/zap/report/report.html
+    volumes:
+      - ./zap-reports:C:/zap/report/  # Mount the local directory for storing ZAP reports
+    networks:
+      - zap-network
+
+networks:
+  zap-network:
